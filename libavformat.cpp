@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -13,7 +14,7 @@ int main(int argc, char *argv[])
     }
 
     const std::string uri = argv[1];
-    std::cout << "uri: " << uri;
+    std::cout << "uri: " << uri << std::endl;
 
     av_register_all();
 
@@ -26,7 +27,7 @@ int main(int argc, char *argv[])
     if (0 > rc) {
         std::cout << "avformat_open_input:"
             << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, errnum)
-            << ":" << rc;
+            << ":" << rc << std::endl;;
         return 0;
     }
 
@@ -34,7 +35,7 @@ int main(int argc, char *argv[])
     if (0 > rc) {
         std::cout << "avformat_find_stream_info:"
             << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, errnum)
-            << ":" << rc;
+            << ":" << rc << std::endl;;
         return rc;
     }
 
@@ -44,7 +45,7 @@ int main(int argc, char *argv[])
         if (0 > rc) {
             std::cout << "av_read_frame:"
                 << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, errnum)
-                << ":" << rc;
+                << ":" << rc << std::endl;;
             break;
         }
         std::cout << "read_frame size: " << packet.size << std::endl;
