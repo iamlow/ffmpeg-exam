@@ -51,8 +51,7 @@ int main(int argc, char *argv[])
         std::cout << "read_frame size: " << packet.size << std::endl;
     }
 
-    avformat_close_input(&fmtCtx);
-    avformat_network_deinit();
+    avformat_close_input(&fmtCtx);    
 
     return 0;
 }
