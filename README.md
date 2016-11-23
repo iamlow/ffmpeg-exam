@@ -10,3 +10,5 @@
  - $ mkdir build && cd build
  - $ cmake -D FFMPEG_INCLUDE_DIR="**C:\app\ffmpeg\ffmpeg-3.2-win64-dev\include**" -D FFMPEG_LIB_DIR="**C:\app\ffmpeg\ffmpeg-3.2-win64-dev\lib**" -G "Visual Studio 14 Win64" ../
  - cmake --build .
+- 실행방법
+  - $ ./libavformat.exe [URL]
