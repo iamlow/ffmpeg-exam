@@ -54,7 +54,7 @@ ffmpeg 3.2
 
 ### input_dshow(libavformat/input_dshow.cpp)
 - libavformat 라이브러리를 사용하여 PC카메라와 마이크로부터 영상 및 음성 데이터의 크리를 화면에 출력하는 예제 프로그램
-- 실행방법, [장치명](https://github.com/iamlow/ffmpeg/tree/develop#pc에-카메라와-마이크에서-스트림을-캡처하여-송신)은 위에 설명한 "내 PC에 있는 장치 정보 얻기" 참조
+- 실행방법, [장치명](#pc에-카메라와-마이크에서-스트림을-캡처하여-송신)은 위에 설명한 "내 PC에 있는 장치 정보 얻기" 참조
  
  ```sh
  $ ./input_dshow.exe "video=Integrated Camera:audio=@device_cm_" <- [장치명]
