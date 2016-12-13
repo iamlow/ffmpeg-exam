@@ -11,6 +11,6 @@
  - $ cmake -D FFMPEG_INCLUDE_DIR="**C:\app\ffmpeg\ffmpeg-3.2-win64-dev\include**" -D FFMPEG_LIB_DIR="**C:\app\ffmpeg\ffmpeg-3.2-win64-dev\lib**" -G "Visual Studio 14 Win64" ../
  - cmake --build .
 - 실행방법
-  - $ ./libavformat.exe [URL]
+  - $ ./input.exe [URL]
 - 동작여부
   - 정상동작되는 경우에는 화면에 100번 루프를 돌면서 읽어온 데이터의 크기가 표시
