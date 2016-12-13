@@ -39,7 +39,7 @@ ffmpeg 3.2
     ```
 
 ## libavformat
-### input
+### input(libavformat/input.cpp)
 - libavformat 라이브러리를 사용하여 네트워크 카메라로 부터 영상 및 음성을 수신하고 데이터의 크기를 화면에 출력하는 예제 프로그램
 - 실행방법
  - $ ./input.exe [URL]
