@@ -18,7 +18,7 @@ ffmpeg 3.2
    ```sh
    $ ffplay -i "udp://127.0.0.1:5000"
    ```
-   
+
  - ffmpeg으로 PC 카메라와 마이크에서 데이터를 가져와서 전송
    - 내 PC에 있는 장치 정보 얻기
 
@@ -32,18 +32,29 @@ ffmpeg 3.2
      [dshow @ 000000000065f580]     Alternative name "@device_cm_"
      dummy: Immediate exit requested
      ```
-      
+
     - 카메라 장치 이름은 "Integrated Camera"이며 오디오 장치 이름은 "마이크 배열(Realtek High Definition Audio)" 이다. 위 이름이 한글이라 ffmpeg에서 인식을 못하면 Alternative name을 사용하면 된다.
   - 내 PC에 있는 카메라와 마이크 장치로부터 미디어를 캡처하여 mpegts로 전송
-     
+
     ```sh
-    $ ffmpeg -f dshow -i video="Integrated Camera":audio="@device_cm_" -f mpegts "udp://127.0.0.1:5000"
+    $ ffmpeg -f dshow -i "video=Integrated Camera:audio=@device_cm_" -f mpegts "udp://127.0.0.1:5000"
     ```
 
 ## libavformat
 ### input(libavformat/input.cpp)
-- libavformat 라이브러리를 사용하여 네트워크 카메라로 부터 영상 및 음성을 수신하고 데이터의 크기를 화면에 출력하는 예제 프로그램
+- libavformat 라이브러리를 사용하여 네트워크 카메라로부터 영상 및 음성을 수신하고 데이터의 크기를 화면에 출력하는 예제 프로그램
 - 실행방법
- - $ ./input.exe [URL]
+ ```sh
+ $ ./input.exe [URL]
+ ```
+- 동작여부
+ - 정상동작되는 경우에는 화면에 100번 루프를 돌면서 읽어온 데이터의 크기가 표시
+
+### input(libavformat/input_dshow.cpp)
+- libavformat 라이브러리를 사용하여 PC카메라와 마이크로부터 영상 및 음성 데이터의 크리를 화면에 출력하는 예제 프로그램
+- 실행방법, [장치명]은 위에 설명한 "내 PC에 있는 장치 정보 얻기" 참조
+ ```sh
+ $ ./input_dshow.exe [장치명]
+ ```
 - 동작여부
  - 정상동작되는 경우에는 화면에 100번 루프를 돌면서 읽어온 데이터의 크기가 표시
