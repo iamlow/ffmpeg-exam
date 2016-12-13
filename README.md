@@ -44,17 +44,22 @@ ffmpeg 3.2
 ### input(libavformat/input.cpp)
 - libavformat 라이브러리를 사용하여 네트워크 카메라로부터 영상 및 음성을 수신하고 데이터의 크기를 화면에 출력하는 예제 프로그램
 - 실행방법
+
  ```sh
  $ ./input.exe [URL]
  ```
+ 
 - 동작여부
  - 정상동작되는 경우에는 화면에 100번 루프를 돌면서 읽어온 데이터의 크기가 표시
 
-### input(libavformat/input_dshow.cpp)
+### input_dshow(libavformat/input_dshow.cpp)
 - libavformat 라이브러리를 사용하여 PC카메라와 마이크로부터 영상 및 음성 데이터의 크리를 화면에 출력하는 예제 프로그램
 - 실행방법, [장치명]은 위에 설명한 "내 PC에 있는 장치 정보 얻기" 참조
+ 
  ```sh
- $ ./input_dshow.exe [장치명]
+ $ ./input_dshow.exe "video=Integrated Camera:audio=@device_cm_" <- [장치명]
+ 
  ```
+
 - 동작여부
  - 정상동작되는 경우에는 화면에 100번 루프를 돌면서 읽어온 데이터의 크기가 표시
