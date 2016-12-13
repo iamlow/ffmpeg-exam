@@ -1,29 +1,33 @@
 # FFmpeg Example
-## ffmpeg
-- 내 PC에 있는 장치 정보 얻기
-```sh
-$ ffmpeg -list_devices true -f dshow -i dummy
-[dshow @ 000000000065f580] DirectShow video devices (some may be both video and audio devices)
-[dshow @ 000000000065f580]  "Integrated Camera"
-[dshow @ 000000000065f580]     Alternative name "@device_pnp_\\?\usb"
-[dshow @ 000000000065f580] DirectShow audio devices
-[dshow @ 000000000065f580]  "마이크 배열(Realtek High Definition Audio)"
-[dshow @ 000000000065f580]     Alternative name "@device_cm_"
-dummy: Immediate exit requested
-```    
-카메라 장치 이름은 "Integrated Camera"이며 오디오 장치 이름은 "마이크 배열(Realtek High Definition Audio)" 이다.
-위 이름이 한글이라 ffmpeg에서 인식을 못하면 Alternative name을 사용하면 된다.
-- 내 PC에 있는 카메라와 마이크 장치로부터 미디어를 캡처하여 mpegts로 전송
-```sh
-$ ffmpeg -f dshow -i video="Integrated Camera":audio="@device_cm_" -f mpegts "udp://127.0.0.1:5000"
-```
-- mpegts로 전달받은 데이터를 ffplay로 재생하기
-```sh
-$ ffplay -i "udp://127.0.0.1:5000"
-```
+## ffmpeg, ffplay, ffprobe
+### PC에 카메라와 마이크에서 스트림을 캡처하여 송신
+ - ffplay는 mpegts로 수신받은 영상과 음성 데이터를 재생
 
-## ffplay
-## ffprobe
+   ```sh
+   $ ffplay -i "udp://127.0.0.1:5000"
+   ```
+   
+ - ffmpeg으로 PC 카메라와 마이크에서 데이터를 가져와서 전송
+   - 내 PC에 있는 장치 정보 얻기
+
+     ```sh
+     $ ffmpeg -list_devices true -f dshow -i dummy
+     [dshow @ 000000000065f580] DirectShow video devices (some may be both video and audio devices)
+     [dshow @ 000000000065f580]  "Integrated Camera"
+     [dshow @ 000000000065f580]     Alternative name "@device_pnp_\\?\usb"
+     [dshow @ 000000000065f580] DirectShow audio devices
+     [dshow @ 000000000065f580]  "마이크 배열(Realtek High Definition Audio)"
+     [dshow @ 000000000065f580]     Alternative name "@device_cm_"
+     dummy: Immediate exit requested
+     ```
+      
+    - 카메라 장치 이름은 "Integrated Camera"이며 오디오 장치 이름은 "마이크 배열(Realtek High Definition Audio)" 이다. 위 이름이 한글이라 ffmpeg에서 인식을 못하면 Alternative name을 사용하면 된다.
+  - 내 PC에 있는 카메라와 마이크 장치로부터 미디어를 캡처하여 mpegts로 전송
+     
+    ```sh
+    $ ffmpeg -f dshow -i video="Integrated Camera":audio="@device_cm_" -f mpegts "udp://127.0.0.1:5000"
+    ```
+
 ## libavformat
 - CMake 빌드를 위한 기본적인 설정 파일 추가
  - cmake 실행 시에 FFmpeg 헤더 참조를 위해 FFMPEG_INCLUDE_DIR 설정 필요
