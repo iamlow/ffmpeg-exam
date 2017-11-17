@@ -9,6 +9,7 @@ extern "C" {
 #include <libavfilter/buffersrc.h>
 #include <libavutil/opt.h>
 }
+
 static char errstr[AV_ERROR_MAX_STRING_SIZE];
 
 static int check_args(int argc, char const *argv[]) {
