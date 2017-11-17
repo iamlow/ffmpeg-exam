@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/iamlow/Documents/GitHub/ffmpeg_exam/libavformat/input_dshow.cpp
+iostream
+-
+string
+-
+libavdevice/avdevice.h
+-
+libavformat/avformat.h
+-
+libavutil/error.h
+-
+
