@@ -31,3 +31,7 @@ ffmpeg 3.2
   ```sh
   $ ./amix [INPUT_FILE1] [INPUT_FILE2] [OUTPUT_FILE]
   ```
+- 참고
+  - AVStream에 codec이 deprecated 되었음. codecpar을 사용해야 함
+  - codecpar를 사용하려면 추가로 avcodec_parameters_XXX 함수들을 사용해야 함
+  - 코덱 인코딩 디코딩을 위한 API 추가됨(https://www.ffmpeg.org/doxygen/3.1/group__lavc__encdec.html)
