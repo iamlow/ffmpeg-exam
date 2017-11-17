@@ -11,13 +11,6 @@ extern "C" {
 }
 static char errstr[AV_ERROR_MAX_STRING_SIZE];
 
-static char *const get_error_text(const int error)
-{
-    static char error_buffer[255];
-    av_strerror(error, error_buffer, sizeof(error_buffer));
-    return error_buffer;
-}
-
 static int check_args(int argc, char const *argv[]) {
     if (4 != argc) {
         std::cout << "invalid argument!\n";
@@ -63,18 +56,14 @@ static AVCodecContext* decoder_init(AVFormatContext *fmt_ctx) {
     // AVCodec* inCodec1 = avcodec_find_decoder(inFmtCtx1->streams[0]->codec->codec_id);
     AVCodec* codec = avcodec_find_decoder(fmt_ctx->streams[0]->codecpar->codec_id);
     if (nullptr == codec) {
-        std::cout << "avcodec_find_decoder:"
-            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
-            << ":" << rc << std::endl;
+        std::cout << "avcodec_find_decoder:" << std::endl;
         return nullptr;
     }
 
     /* Allocate a codec context for the decoder */
     AVCodecContext *codec_ctx = avcodec_alloc_context3(codec);
     if (nullptr == codec_ctx) {
-        std::cout << "avcodec_alloc_context3:"
-            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
-            << ":" << rc << std::endl;
+        std::cout << "avcodec_alloc_context3:" << std::endl;
         return nullptr;
     }
 
@@ -113,8 +102,9 @@ static AVFilterContext* filter_init(AVFilterGraph **fg,
     int rc = avfilter_graph_create_filter(&filter_ctx,
             filter, filter_alias.data(), args.data(), NULL, *fg);
     if (rc < 0) {
-        av_log(NULL, AV_LOG_ERROR, "Cannot create %s:%s filter\n",
-                filter_name.data(), filter_alias.data());
+        std::cout << "avfilter_graph_create_filter:"
+            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+            << ":" << rc << std::endl;
         return nullptr;
     }
 
@@ -132,7 +122,6 @@ int main(int argc, char const *argv[]) {
     av_log_set_level(AV_LOG_TRACE);
     av_register_all();
     avfilter_register_all();
-
 
     int rc = 0;
 
@@ -191,13 +180,13 @@ int main(int argc, char const *argv[]) {
      * it will be used to get the filtered data out of the graph. */
     AVFilter *abuffersink = avfilter_get_by_name("abuffersink");
     if (!abuffersink) {
-        av_log(NULL, AV_LOG_ERROR, "Could not find the abuffersink filter.\n");
+        std::cout << "avfilter_get_by_name:" << std::endl;
         return AVERROR_FILTER_NOT_FOUND;
     }
 
     AVFilterContext *abuffersinkCtx = avfilter_graph_alloc_filter(fg, abuffersink, "sink");
     if (!abuffersinkCtx) {
-        av_log(NULL, AV_LOG_ERROR, "Could not allocate the abuffersink instance.\n");
+        std::cout << "avfilter_graph_alloc_filter:" << rc << std::endl;
         return AVERROR(ENOMEM);
     }
 
@@ -209,15 +198,19 @@ int main(int argc, char const *argv[]) {
 #define OUTPUT_CHANNELS 1
     char ch_layout[64];
     av_get_channel_layout_string(ch_layout, sizeof(ch_layout), 0, OUTPUT_CHANNELS);
-    av_opt_set(abuffersinkCtx, "channel_layout", ch_layout, AV_OPT_SEARCH_CHILDREN);
+    rc = av_opt_set(abuffersinkCtx, "channel_layout", ch_layout, AV_OPT_SEARCH_CHILDREN);
     if (rc < 0) {
-        av_log(NULL, AV_LOG_ERROR, "Could set options to the abuffersink instance.\n");
+        std::cout << "av_opt_set:"
+            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+            << ":" << rc << std::endl;
         return rc;
     }
 
     rc = avfilter_init_str(abuffersinkCtx, NULL);
     if (rc < 0) {
-        av_log(NULL, AV_LOG_ERROR, "Could not initialize the abuffersink instance.\n");
+        std::cout << "avfilter_init_str:"
+            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+            << ":" << rc << std::endl;
         return rc;
     }
 
@@ -228,14 +221,18 @@ int main(int argc, char const *argv[]) {
 	if (rc >= 0)
         rc = avfilter_link(amixCtx, 0, abuffersinkCtx, 0);
     if (rc < 0) {
-        av_log(NULL, AV_LOG_ERROR, "Error connecting filters\n");
+        std::cout << "avfilter_link:"
+            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+            << ":" << rc << std::endl;
         return rc;
     }
 
     /* Configure the graph. */
     rc = avfilter_graph_config(fg, NULL);
     if (rc < 0) {
-        av_log(NULL, AV_LOG_ERROR, "Error while configuring graph : %s\n", get_error_text(rc));
+        std::cout << "avfilter_graph_config:"
+            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+            << ":" << rc << std::endl;
         return rc;
     }
 
@@ -247,18 +244,14 @@ int main(int argc, char const *argv[]) {
     // AVCodec* outCodec = avcodec_find_encoder(inFmtCtx1->streams[0]->codecpar->codec_id);
     AVCodec* outCodec = avcodec_find_encoder(AV_CODEC_ID_PCM_S16LE);
     if (nullptr == outCodec) {
-        std::cout << "avcodec_find_encoder:"
-            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
-            << ":" << rc << std::endl;
+        std::cout << "avcodec_find_encoder:" << std::endl;
         return -1;
     }
 
     /* Allocate a codec context for the decoder */
     AVCodecContext *outCodecCtx = avcodec_alloc_context3(outCodec);
     if (nullptr == outCodecCtx) {
-        std::cout << "avcodec_alloc_context3:"
-            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
-            << ":" << rc << std::endl;
+        std::cout << "avcodec_alloc_context3:" << std::endl;
         return -1;
     }
 
@@ -277,49 +270,55 @@ int main(int argc, char const *argv[]) {
     avformat_alloc_output_context2(&outFmtCtx,
                                     NULL, NULL, output_file.data());
     if (!outFmtCtx) {
-        av_log(NULL, AV_LOG_ERROR, "Could not create output context\n");
+        std::cout << "avformat_alloc_output_context2:" << std::endl;
         return AVERROR_UNKNOWN;
     }
 
     /** Create a new audio stream in the output file container. */
     AVStream *stream = avformat_new_stream(outFmtCtx, nullptr);
     if (!stream) {
-        av_log(NULL, AV_LOG_ERROR, "Could not create new stream\n");
-        rc = AVERROR(ENOMEM);
-        return -1;
+        std::cout << "avformat_new_stream:" << std::endl;
+        return AVERROR(ENOMEM);
     }
 
     /* copy the stream parameters to the muxer */
     rc = avcodec_parameters_from_context(stream->codecpar, outCodecCtx);
     if (rc < 0) {
-        fprintf(stderr, "Could not copy the stream parameters\n");
-        exit(1);
+        std::cout << "avcodec_parameters_from_context:"
+            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+            << ":" << rc << std::endl;
+        return rc;
     }
 
     if (outFmtCtx->oformat->flags & AVFMT_GLOBALHEADER)
         outFmtCtx->flags |= CODEC_FLAG_GLOBAL_HEADER;
 
     /** Open the output file to write to it. */
-    if ((rc = avio_open(&outFmtCtx->pb, output_file.data(), AVIO_FLAG_WRITE)) < 0) {
-        // av_log(NULL, AV_LOG_ERROR, "Could not open output file '%s' (error '%s')\n",
-        //        filename, get_error_text(rc));
-        std::cout << "avio_open is failed\n";
+    rc = avio_open(&outFmtCtx->pb, output_file.data(), AVIO_FLAG_WRITE);
+    if (rc < 0) {
+        std::cout << "avio_open:"
+            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+            << ":" << rc << std::endl;
         return rc;
     }
 
     av_dump_format(outFmtCtx, 0, output_file.data(), 1);
 
     /** Open the encoder for the audio stream to use it later. */
-    if ((rc = avcodec_open2(outCodecCtx, outCodec, NULL)) < 0) {
-        av_log(NULL, AV_LOG_ERROR, "Could not open output codec (error '%s')\n",
-               get_error_text(rc));
-        return -1;
+    rc = avcodec_open2(outCodecCtx, outCodec, NULL);
+    if (rc < 0) {
+        std::cout << "avcodec_open2:"
+            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+            << ":" << rc << std::endl;
+        return rc;
     }
 
     rc = avformat_write_header(outFmtCtx, NULL);
     if (rc < 0) {
-        fprintf(stderr, "Error occurred when opening output file\n");
-        return -1;
+        std::cout << "avformat_write_header:"
+            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+            << ":" << rc << std::endl;
+        return rc;
     }
 
     for (;;) {
@@ -344,27 +343,31 @@ int main(int argc, char const *argv[]) {
             AVFrame *frame = av_frame_alloc();
 
             int i, ch;
-            int ret, data_size;
+            int data_size;
             /* send the packet with the compressed data to the decoder */
-            ret = avcodec_send_packet(inCodecCtx1, &packet);
-            if (ret < 0) {
-                fprintf(stderr, "Error submitting the packet to the decoder\n");
-                exit(1);
+            rc = avcodec_send_packet(inCodecCtx1, &packet);
+            if (rc < 0) {
+                std::cout << "avcodec_send_packet:"
+                    << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+                    << ":" << rc << std::endl;
+                break;
             }
             /* read all the output frames (in general there may be any number of them */
-            while (ret >= 0) {
-                ret = avcodec_receive_frame(inCodecCtx1, frame);
-                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+            while (rc >= 0) {
+                rc = avcodec_receive_frame(inCodecCtx1, frame);
+                if (rc == AVERROR(EAGAIN) || rc == AVERROR_EOF)
                     break;
-                else if (ret < 0) {
-                    fprintf(stderr, "Error during decoding\n");
-                    exit(1);
+                else if (rc < 0) {
+                    std::cout << "avcodec_receive_frame:"
+                        << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+                        << ":" << rc << std::endl;
+                    break;
                 }
+
                 data_size = av_get_bytes_per_sample(inCodecCtx1->sample_fmt);
                 if (data_size < 0) {
-                    /* This should not occur, checking just for paranoia */
-                    fprintf(stderr, "Failed to calculate data size\n");
-                    exit(1);
+                    std::cout << "av_get_bytes_per_sample:" << std::endl;
+                    break;
                 }
 
                 std::cout << "decoding data size: " << frame->nb_samples
@@ -372,7 +375,9 @@ int main(int argc, char const *argv[]) {
 
                 rc = av_buffersrc_write_frame(abufferCtx1, frame);
                 if (rc < 0) {
-                    av_log(NULL, AV_LOG_ERROR, "Error writing EOF null frame for input abufferCtx1\n");
+                    std::cout << "av_buffersrc_write_frame:"
+                        << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+                        << ":" << rc << std::endl;
                     break;
                 }
             }
@@ -401,32 +406,38 @@ int main(int argc, char const *argv[]) {
             AVFrame *frame = av_frame_alloc();
 
             int i, ch;
-            int ret, data_size;
+            int data_size;
             /* send the packet with the compressed data to the decoder */
-            ret = avcodec_send_packet(inCodecCtx2, &packet);
-            if (ret < 0) {
-                fprintf(stderr, "Error submitting the packet to the decoder\n");
-                exit(1);
+            rc = avcodec_send_packet(inCodecCtx2, &packet);
+            if (rc < 0) {
+                std::cout << "avcodec_send_packet:"
+                    << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+                    << ":" << rc << std::endl;
+                break;
             }
             /* read all the output frames (in general there may be any number of them */
-            while (ret >= 0) {
-                 ret = avcodec_receive_frame(inCodecCtx2, frame);
-                 if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+            while (rc >= 0) {
+                 rc = avcodec_receive_frame(inCodecCtx2, frame);
+                 if (rc == AVERROR(EAGAIN) || rc == AVERROR_EOF)
                      break;
-                 else if (ret < 0) {
-                     fprintf(stderr, "Error during decoding\n");
-                     exit(1);
+                 else if (rc < 0) {
+                     std::cout << "avcodec_receive_frame:"
+                         << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+                         << ":" << rc << std::endl;
+                     break;
                  }
+
                  data_size = av_get_bytes_per_sample(inCodecCtx2->sample_fmt);
                  if (data_size < 0) {
-                     /* This should not occur, checking just for paranoia */
-                     fprintf(stderr, "Failed to calculate data size\n");
-                     exit(1);
+                    std::cout << "av_get_bytes_per_sample:" << std::endl;
+                    break;
                  }
 
                  rc = av_buffersrc_write_frame(abufferCtx2, frame);
                  if (rc < 0) {
-                     av_log(NULL, AV_LOG_ERROR, "Error writing EOF null frame for input %d\n", i);
+                     std::cout << "av_buffersrc_write_frame:"
+                         << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+                         << ":" << rc << std::endl;
                      break;
                  }
 
@@ -441,7 +452,9 @@ int main(int argc, char const *argv[]) {
             while (1) {
                 rc = av_buffersink_get_frame(abuffersinkCtx, filt_frame);
                 if (rc == AVERROR(EAGAIN) || rc == AVERROR_EOF){
-                    av_log(NULL, AV_LOG_INFO, "Need to read input \n");
+                    std::cout << "av_buffersink_get_frame:"
+                        << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+                        << ":" << rc << std::endl;
                     break;
                 }
 
@@ -452,29 +465,33 @@ int main(int argc, char const *argv[]) {
                     packet.size = 0;
 
                     /* send the frame for encoding */
-                    int ret = avcodec_send_frame(outCodecCtx, filt_frame);
-                    if (ret < 0) {
-                        fprintf(stderr, "Error sending the frame to the encoder\n");
-                        exit(1);
+                    rc = avcodec_send_frame(outCodecCtx, filt_frame);
+                    if (rc < 0) {
+                        std::cout << "avcodec_send_frame:"
+                            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+                            << ":" << rc << std::endl;
+                        break;
                     }
 
                     /* read all the available output packets (in general there may be any
                      * number of them */
                     // while (ret >= 0) {
-                    ret = avcodec_receive_packet(outCodecCtx, &packet);
-                    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+                    rc = avcodec_receive_packet(outCodecCtx, &packet);
+                    if (rc == AVERROR(EAGAIN) || rc == AVERROR_EOF)
                         return -1;
-                    else if (ret < 0) {
-                        fprintf(stderr, "Error encoding audio frame\n");
-                        exit(1);
+                    else if (rc < 0) {
+                        std::cout << "avcodec_receive_packet:"
+                            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+                            << ":" << rc << std::endl;
+                        break;
                     }
                     std::cout << "encoding packet = " << packet.size << std::endl;
 
                     if ((rc = av_write_frame(outFmtCtx, &packet)) < 0) {
-                        // av_log(NULL, AV_LOG_ERROR, "Could not write frame (error '%s')\n",
-                        //        get_error_text(error));
-                        // av_free_packet(&output_packet);
-                        return rc;
+                        std::cout << "av_write_frame(:"
+                            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+                            << ":" << rc << std::endl;
+                        break;
                     }
 
                     av_packet_unref(&packet);
