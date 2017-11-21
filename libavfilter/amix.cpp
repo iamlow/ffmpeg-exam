@@ -197,15 +197,15 @@ int main(int argc, char const *argv[]) {
                               AV_SAMPLE_FMT_NONE, AV_OPT_SEARCH_CHILDREN);
 
 #define OUTPUT_CHANNELS 1
-    char ch_layout[64];
-    av_get_channel_layout_string(ch_layout, sizeof(ch_layout), 0, OUTPUT_CHANNELS);
-    rc = av_opt_set(abuffersinkCtx, "channel_layout", ch_layout, AV_OPT_SEARCH_CHILDREN);
-    if (rc < 0) {
-        std::cout << "av_opt_set:"
-            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
-            << ":" << rc << std::endl;
-        return rc;
-    }
+    // char ch_layout[64];
+    // av_get_channel_layout_string(ch_layout, sizeof(ch_layout), 0, OUTPUT_CHANNELS);
+    // rc = av_opt_set(abuffersinkCtx, "channel_layout", ch_layout, AV_OPT_SEARCH_CHILDREN);
+    // if (rc < 0) {
+    //     std::cout << "av_opt_set:"
+    //         << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+    //         << ":" << rc << std::endl;
+    //     return rc;
+    // }
 
     rc = avfilter_init_str(abuffersinkCtx, NULL);
     if (rc < 0) {
