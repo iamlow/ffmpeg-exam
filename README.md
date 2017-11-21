@@ -7,9 +7,12 @@ ffmpeg 3.2
  - cmake 실행 시에 FFmpeg 헤더 참조를 위해 FFMPEG_INCLUDE_DIR 설정 필요
  - cmake 실행 시에 FFmpeg 라이브러리 참조를 위해 FFMPEG_LIB_DIR 설정 필요
 - CMake 사용법(**FFMPEG_INCLUDE_DIR와 FFMPEG_LIB_DIR에 FFmpeg 경로설정필요!**)
- - $ mkdir build && cd build
- - $ cmake -D FFMPEG_INCLUDE_DIR="**C:\app\ffmpeg\ffmpeg-3.2-win64-dev\include**" -D FFMPEG_LIB_DIR="**C:\app\ffmpeg\ffmpeg-3.2-win64-dev\lib**" -G "Visual Studio 14 Win64" ../
- - cmake --build .
+
+  ```sh
+  $ mkdir build && cd build
+  $ cmake -D FFMPEG_INCLUDE_DIR="C:\app\ffmpeg\ffmpeg-3.2-win64-dev\include" -D FFMPEG_LIB_DIR="C:\app\ffmpeg\ffmpeg-3.2-win64-dev\lib" -G "Visual Studio 14 Win64" ../
+  $ cmake --build .
+  ```
 
 ## Command line tools(ffmpeg, ffplay, ffprobe)
 ### PC에 카메라와 마이크에서 스트림을 캡처하여 송신
