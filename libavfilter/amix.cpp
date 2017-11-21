@@ -256,6 +256,14 @@ int main(int argc, char const *argv[]) {
         return -1;
     }
 
+    // rc = avcodec_copy_context(outCodecCtx, inCodecCtx1);
+    // if (0 > rc) {
+    //     std::cout << "avcodec_copy_context:"
+    //         << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+    //         << ":" << rc << std::endl;
+    //     return rc;
+    // }
+
     /* put sample parameters */
     outCodecCtx->bit_rate = 11025;
 
@@ -506,7 +514,7 @@ int main(int argc, char const *argv[]) {
         }
     }
 
-    avformat_write_header(outFmtCtx, nullptr);
+    av_write_trailer(outFmtCtx);
 
     avcodec_close(outCodecCtx);
     avcodec_free_context(&outCodecCtx);
