@@ -97,6 +97,92 @@ static AVFilterContext* filter_init(AVFilterGraph **fg,
     return filter_ctx;
 }
 
+static AVCodecContext* encoder_init(AVCodecContext *dec_ctx) {
+    int rc = 0;
+
+    AVCodec* encoder = avcodec_find_encoder(AV_CODEC_ID_H264);
+    if (nullptr == encoder) {
+        std::cout << "avcodec_find_encoder:" << std::endl;
+        return nullptr;
+    }
+
+    /* Allocate a codec context for the decoder */
+    AVCodecContext *enc_ctx = avcodec_alloc_context3(encoder);
+    if (nullptr == enc_ctx) {
+        std::cout << "avcodec_alloc_context3:" << std::endl;
+        return nullptr;
+    }
+
+    enc_ctx->bit_rate = dec_ctx->bit_rate;
+    enc_ctx->width = dec_ctx->width >> 1;
+    enc_ctx->height = dec_ctx->height >> 1;
+    enc_ctx->time_base = dec_ctx->time_base;
+    // ost->st->time_base = (AVRational){ 1, STREAM_FRAME_RATE };
+    enc_ctx->time_base       = (AVRational){ 1, 1000 };
+    enc_ctx->sample_aspect_ratio = dec_ctx->sample_aspect_ratio;
+    enc_ctx->pix_fmt = avcodec_default_get_format(enc_ctx, encoder->pix_fmts);
+
+    rc = avcodec_open2(enc_ctx, encoder, nullptr);
+    if ( rc < 0) {
+        std::cout << "avcodec_open2:"
+            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+            << ":" << rc << std::endl;
+        return nullptr;
+    }
+
+    return enc_ctx;
+}
+
+static AVFormatContext* muxer_init(const std::string& filename, AVCodecContext *outCodecCtx) {
+    int rc = 0;
+
+    AVFormatContext *outFmtCtx = nullptr;
+    avformat_alloc_output_context2(&outFmtCtx, NULL, NULL, filename.data());
+    if (!outFmtCtx) {
+        std::cout << "avformat_alloc_output_context2:" << std::endl;
+        return nullptr;
+    }
+
+    AVStream *stream = avformat_new_stream(outFmtCtx, nullptr);
+    if (!stream) {
+        std::cout << "avformat_new_stream:" << std::endl;
+        return nullptr;
+    }
+
+    /* copy the stream parameters to the muxer */
+    rc = avcodec_parameters_from_context(stream->codecpar, outCodecCtx);
+    if (rc < 0) {
+        std::cout << "avcodec_parameters_from_context:"
+            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+            << ":" << rc << std::endl;
+        return nullptr;
+    }
+
+    if (outFmtCtx->oformat->flags & AVFMT_GLOBALHEADER)
+        outFmtCtx->flags |= CODEC_FLAG_GLOBAL_HEADER;
+
+    /** Open the output file to write to it. */
+    rc = avio_open(&outFmtCtx->pb, filename.data(), AVIO_FLAG_WRITE);
+    if (rc < 0) {
+        std::cout << "avio_open:"
+            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+            << ":" << rc << std::endl;
+        return nullptr;
+    }
+
+    av_dump_format(outFmtCtx, 0, filename.data(), 1);
+
+    rc = avformat_write_header(outFmtCtx, NULL);
+    if (rc < 0) {
+        std::cout << "avformat_write_header:"
+            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+            << ":" << rc << std::endl;
+        return nullptr;
+    }
+
+    return outFmtCtx;
+}
+
 /**
  * input file - decoder - scale filter - encoder - output file
  *
@@ -176,6 +262,17 @@ int main(int argc, char const *argv[]) {
     char* dump = avfilter_graph_dump(fg, nullptr);
     av_log(NULL, AV_LOG_ERROR, "Graph :\n%s\n", dump);
 
+    AVCodecContext *enc_ctx = encoder_init(dec_ctx);
+    AVFormatContext *out_fmt_ctx = muxer_init(output_file, enc_ctx);
+
+    rc = avformat_write_header(out_fmt_ctx, NULL);
+    if (rc < 0) {
+        std::cout << "avformat_write_header:"
+            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+            << ":" << rc << std::endl;
+        return rc;
+    }
+
     while (1) {
 
         // read input file
@@ -227,7 +324,7 @@ int main(int argc, char const *argv[]) {
             break;
         }
 
-        // check frame 
+        // check frame
         if (rc < 0) {
             continue;
         }
@@ -258,11 +355,61 @@ int main(int argc, char const *argv[]) {
 
         std::cout << "filter res: " << filt_frame->width << "x" << filt_frame->height << '\n';
 
+        {
+            {
+                AVPacket packet;
+                av_init_packet(&packet);
+                packet.data = nullptr;
+                packet.size = 0;
+
+                /* send the frame for encoding */
+                rc = avcodec_send_frame(enc_ctx, filt_frame);
+                if (rc < 0) {
+                    std::cout << "avcodec_send_frame:"
+                        << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+                        << ":" << rc << std::endl;
+                    break;
+                }
+
+                /* read all the available output packets (in general there may be any
+                 * number of them */
+                while (rc >= 0) {
+                    rc = avcodec_receive_packet(enc_ctx, &packet);
+                    if (rc == AVERROR(EAGAIN) || rc == AVERROR_EOF)
+                        continue;
+                    else if (rc < 0) {
+                        std::cout << "avcodec_receive_packet:"
+                            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+                            << ":" << rc << std::endl;
+                        break;
+                    }
+                    std::cout << "encoding packet = " << packet.size << std::endl;
+
+                    if ((rc = av_write_frame(out_fmt_ctx, &packet)) < 0) {
+                        std::cout << "av_write_frame(:"
+                            << av_make_error_string(errstr, AV_ERROR_MAX_STRING_SIZE, rc)
+                            << ":" << rc << std::endl;
+                        break;
+                    }
+
+                    av_packet_unref(&packet);
+                }
+            }
+
+            av_frame_unref(filt_frame);
+        }
+
         // av_frame_free(&dec_frame);
         av_frame_free(&filt_frame);
 
         av_frame_free(&dec_frame);
     }
+
+    av_write_trailer(out_fmt_ctx);
+
+    avcodec_close(enc_ctx);
+    avcodec_free_context(&enc_ctx);
+    avformat_close_input(&out_fmt_ctx);
 
     avfilter_free(bufsink_filter_ctx);
     avfilter_free(scale_filter_ctx);
