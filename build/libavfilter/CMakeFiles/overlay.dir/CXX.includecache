@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../libavfilter/../wrap/InputFormatContext.hpp
+libavformat/avformat.h
+-
+
+/Users/iamlow/Documents/GitHub/ffmpeg_exam/libavfilter/overlay.cpp
+array
+-
+iostream
+-
+string
+-
+libavcodec/avcodec.h
+-
+InputFormatContext.hpp
+/Users/iamlow/Documents/GitHub/ffmpeg_exam/libavfilter/InputFormatContext.hpp
+

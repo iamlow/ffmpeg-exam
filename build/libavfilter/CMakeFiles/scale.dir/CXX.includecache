@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/iamlow/Documents/GitHub/ffmpeg_exam/libavfilter/scale.cpp
+array
+-
+iostream
+-
+string
+-
+libavcodec/avcodec.h
+-
+libavformat/avformat.h
+-
+libavfilter/buffersink.h
+-
+libavfilter/buffersrc.h
+-
+

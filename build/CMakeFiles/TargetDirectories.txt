@@ -1,0 +1,11 @@
+/Users/iamlow/Documents/GitHub/ffmpeg_exam/build/CMakeFiles/rebuild_cache.dir
+/Users/iamlow/Documents/GitHub/ffmpeg_exam/build/CMakeFiles/edit_cache.dir
+/Users/iamlow/Documents/GitHub/ffmpeg_exam/build/libavformat/CMakeFiles/rebuild_cache.dir
+/Users/iamlow/Documents/GitHub/ffmpeg_exam/build/libavformat/CMakeFiles/edit_cache.dir
+/Users/iamlow/Documents/GitHub/ffmpeg_exam/build/libavformat/CMakeFiles/input_dshow.dir
+/Users/iamlow/Documents/GitHub/ffmpeg_exam/build/libavformat/CMakeFiles/input.dir
+/Users/iamlow/Documents/GitHub/ffmpeg_exam/build/libavfilter/CMakeFiles/rebuild_cache.dir
+/Users/iamlow/Documents/GitHub/ffmpeg_exam/build/libavfilter/CMakeFiles/edit_cache.dir
+/Users/iamlow/Documents/GitHub/ffmpeg_exam/build/libavfilter/CMakeFiles/overlay.dir
+/Users/iamlow/Documents/GitHub/ffmpeg_exam/build/libavfilter/CMakeFiles/scale.dir
+/Users/iamlow/Documents/GitHub/ffmpeg_exam/build/libavfilter/CMakeFiles/amix.dir
