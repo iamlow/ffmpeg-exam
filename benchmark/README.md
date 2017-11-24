@@ -2,7 +2,7 @@
 ## 목적
 - CPU에 내장된 GPU의 디코딩/인코딩/비디오 스케일링/비디오 오버레이 성능 파악
 ## 시나리오
-- 3개의 1080p30f 파일을 디코딩 후 스케일링과 오버레이 작업을 거친 후 1개의 비디오로 인코딩
+- 3개의 1080p30f 파일을 디코딩 후 스케일링과 오버레이 작업을 거친 후 1개의 1080p30f 로 인코딩
 ## 테스트 방법
 - FFmpeg v3.3 & v3.4 Command Line Tool을 사용하여 진행
 - 디코더는 H.264 S/W 사용
@@ -60,11 +60,13 @@
     [1:a][2:a]amerge,pan=stereo:c0<c0+c2:c1<c1+c3[audio]" \
     -map "[video]" -map "[audio]" -c:v h264_videotoolbox -b:size 3200k output.mkv
     ```
-
 ## 테스트 결과
 - FFmpeg 인코딩 Speed 0.99x~1x 기준
 - CPU 점유율: 최대 50%
 - GPU Frequency: 최대 0.18GHz
+## 결론
+- 해당 사니리오 정도의 영상처리는 외장 GPU 도움없이 내장 GPU로도 영상처리 가능
+- MacOS 아닌 다른 OS(Linux, Windows)에서는 H/W 디코더도 사용가능하면 GPU를 더 활용 가능
 ## 기타
 - NVidia GTX 시리즈와는 다르게 H/W 인코더 인스턴스 개수 제한 없음
 - FFmpeg 인코딩 Speed가 0.9x~1x 정도를 유지하며 H/W 인코더 최대 6개까지 동시 사용 가능
